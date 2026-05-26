@@ -1,1 +1,31 @@
+sudo apt update
+sudo apt upgrade-y
+sudo apt install python3-rpi.gpio -y
 
+#NASTAVENÍ TEPLOTNÍHO SENZORU
+sudo raspi-config
+pip3 install Adafruit_DHT
+sudo modprobe w1-gpio
+sudo modprobe w1-therm
+
+#NASTAVENÍ RASPBERRY PI ABY program.py BĚŽEL NONSTOP
+sudo nano /etc/systemd/system/smarthome.service
+  (do ní jsem vložil toto:
+    [Unit]
+    Description=SmartHome Program
+    After=multi-user.target
+
+    [Service]
+    ExecStart=/usr/bin/python3 /home/pi/program.py
+    WorkingDirectory=/home/pi
+    User=pi
+    Restart=always
+    RestartSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+  )
+sudo systemctl daemon-reload
+sudo systemctl enable smarthome.service
+sudo systemctl start smarthome.service
+journalctl -u smarthome.service -f
